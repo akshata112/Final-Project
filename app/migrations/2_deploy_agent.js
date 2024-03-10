@@ -1,4 +1,4 @@
-var Agent = artifacts.require("Agent");
+var Agent = artifacts.require("./Agent.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(Agent);
