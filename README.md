@@ -1,4 +1,4 @@
-# SwasthyaChain : Health Records Management Using Blockchain
+# Healthcare Dapp : Health Records Management Using Blockchain
 
 
 ## Introduction
