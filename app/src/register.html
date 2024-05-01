@@ -82,9 +82,60 @@
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="age">Age:</label>
                             <div class="col-sm-8">
-                                <input type="age" class="form-control" id="age" placeholder="Enter age" name = "Age" required>
+                                <input type="text" class="form-control" id="age" placeholder="Enter age" name = "Age" required>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="gender">Gender: </label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="gender" placeholder="Male/Female/Others" name = "gender" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="maritalstatus">Marital Status: </label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="maritalstatus" placeholder="SIngle/Married" name = "maritalstatus" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="occupation">Occupation:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="occupation" placeholder="Enter occupation" name = "Occupation" required autofocus>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="place">Address:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="place" placeholder="Enter your address" name = "place" required autofocus>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="guardian">Father/Spouse Name:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="guardian" placeholder="Enter Father/Spouse Name" name = "guardian" required autofocus>
+                            </div>
+                        </div>
+                        
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="phonenumber">Contact Number:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="phonenumber" placeholder="Enter your phone number" name = "phonenumber" required autofocus>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="email">Email:</label>
+                            <div class="col-sm-8">
+                                <input type="email" class="form-control" id="email" placeholder="Enter your email address (optional)" name="email" autofocus pattern="^[a-zA-Z0-9]+@gmail\.com$">
+                                <small class="form-text text-muted">Email should end with @gmail.com.</small>
+                            </div>
+                        </div>                        
+
                         <div class="form-group"> 
                             <label for="designation" class="control-label col-sm-2">Registering as</label>
                             <div class="col-sm-8">
@@ -126,6 +177,26 @@
 
         name = $("#name").val();
         age = $("#age").val();
+        // gender = $("#gender").val();
+        // maritalstatus = $("#maritalstatus").val();
+        occupation=$("#occupation").val();
+        // place=$("#place").val();
+        guardian=$("#guardian").val();
+        phonenumber=$("#phonenumber").val();
+        // email=$("#email").val();
+
+        // let inputarray=[];
+        // inputarray.push(gender);
+        // inputarray.push(maritalstatus);
+        // inputarray.push(occupation);
+        // inputarray.push(place);
+        // inputarray.push(guardian);
+        // inputarray.push(phonenumber);
+        // inputarray.push(email);
+
+        // console.log(inputarray);
+
+
 
         designation = $("#designation").val();
         designation = parseInt(designation);
@@ -154,12 +225,12 @@
                 console.error(error);
             });
 
-        contractInstance.get_insurer_list({gas: 1000000},function(error, result){
-            if(!error)
-                InsurerList = result;
-            else
-                console.error(error);
-            });
+        // contractInstance.get_insurer_list({gas: 1000000},function(error, result){
+        //     if(!error)
+        //         InsurerList = result;
+        //     else
+        //         console.error(error);
+        //     });
 
         if (validPublicKey == false) {
             $(".alert-warning").show();
@@ -175,11 +246,11 @@
                      validAgent = false;
                 }
             }
-            for(j = 0; j < InsurerList.length; j++) {
-                 if (publicKey == InsurerList[j] ){
-                     validAgent = false;
-                }
-            }
+            // for(j = 0; j < InsurerList.length; j++) {
+            //      if (publicKey == InsurerList[j] ){
+            //          validAgent = false;
+            //     }
+            // }
             console.log(validAgent);
             if (validAgent == true) {
                 $(".alert-warning").hide()
@@ -191,7 +262,7 @@
                     var reportTitle = 
 `Name: ${name}
 Public Key: ${publicKey}
-                            
+
 `;
                     var buffer = Buffer(reportTitle);
                     
@@ -202,7 +273,9 @@ Public Key: ${publicKey}
                             console.log("result:"+result);
                             ipfshash = result[0].hash;
                             console.log("Ipfs hash:"+ipfshash);
-                            contractInstance.add_agent(name, age, designation, ipfshash, {gas: 1000000}, (err, res) => {
+                            console.log("before patient call");
+                            // console.log(inputarray);
+                            contractInstance.add_agent(name, age, guardian, phonenumber, designation, ipfshash, {gas: 1000000}, (err, res) => {
                                 if(!err){
                                     location.replace("./patient.html");
                                 }else{
@@ -213,7 +286,9 @@ Public Key: ${publicKey}
                         }
                     })
                 }else{
-                    contractInstance.add_agent(name, age, designation, ipfshash, {gas: 1000000}, (err, res) => {
+                    console.log("before doctor call");
+                    // console.log(inputarray);
+                    contractInstance.add_agent(name, age, occupation,phonenumber, designation, ipfshash, {gas: 1000000}, (err, res) => {
                     if (!err) {
                         if (designation == "1") {
                             location.replace("./doctor.html");

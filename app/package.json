@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bs58": "^5.0.0",
     "solc": "^0.4.24",
     "web3": "^0.20.0"
   },

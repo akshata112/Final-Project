@@ -16,7 +16,10 @@
     <link rel="icon" type="image/png" href="/favicon.ico"/>
     <!-- <script src="js/bundle.js"></script> -->
     <!-- Custom CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/base-x@latest/dist/base-x.min.js"></script>
     <style>
+
+        
 
     .panel{
         margin-bottom: 60px;
@@ -49,10 +52,8 @@
 
 <body>
 
-    <!-- Navigation -->
     <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
         <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
                     <span class="sr-only">Toggle navigation</span>
@@ -62,7 +63,6 @@
                 </button>
                 <a class="navbar-brand" href="#">Health-Records Vault</a>
             </div>
-            <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
@@ -70,15 +70,13 @@
                     </li>
                 </ul>
             </div>
-            <!-- /.navbar-collapse -->
         </div>
-        <!-- /.container -->
     </nav>
 
     <div class="container">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="text-center">Personal Information</h3>
+                <h3 class="text-center">Personal Information of Doctor</h3>
             </div>
             <div class="panel-body">
                 <div class="row">
@@ -88,9 +86,18 @@
                                 <th>Name:</th>
                                 <td id="name"></td>
                             </tr>
+                            
                             <tr>
                                 <th>Age:</th>
                                 <td id="age"></td>
+                            </tr>
+                            <tr>
+                                <th>Designation:</th>
+                                <td id="occupation"></td>
+                            </tr>
+                            <tr>
+                                <th>Contact Number:</th>
+                                <td id="phonenumber"></td>
                             </tr>
                         </table>
                     </div>
@@ -132,19 +139,11 @@
 <script src="js/app.js"></script>
 <script src="/js/web3.min.js"></script>
 <script src="https://unpkg.com/ipfs-api/dist/index.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/0.20.0/web3.min.js"></script>
 <script>
     var ipfs = window.IpfsApi('localhost', '5001')
 
     const Buffer = window.IpfsApi().Buffer;
-
-    var ailmentsDict = {};
-    ailmentsDict[0] = "Common Flu";
-    ailmentsDict[1] = "Viral Infection";
-    ailmentsDict[2] = "Cancer";
-    ailmentsDict[3] = "Tumor";
-    ailmentsDict[4] = "Covid-19";
-    ailmentsDict[5] = "Heart-Disorder";
-    ailmentsDict[6] = "Other";
     var url_string = window.location.href;
     var url = new URL(url_string);
     var key ;
@@ -161,13 +160,19 @@
 
         var a = 0;
         var b = 0;
+        var occupation="";
+        var phonenumber="";
         contractInstance.get_doctor.call(key, {gas: 1000000},function(error, result){
             if(!error){
-                a = result[0]; 
+                a = "Dr. " + result[0]; 
                 b = result[1];
+                occupation=result[2];
+                phonenumber=result[3];
                 docName = a;
                 $("#name").html(a);
                 $("#age").html(b.c[0]);
+                $("#occupation").html(occupation);
+                $("#phonenumber").html(phonenumber);
             }
                 
             else
@@ -208,6 +213,8 @@
         });
 
     });
+
+    
         
     function showRecords(element){
 
@@ -218,7 +225,88 @@
         if (toggleRecordsButton%2 == 0){
 
             var patientRecord = ""
+
+            var ailmentsDict={
+                    "Diseases_of_the_blood" : {
+                        "Anaemias or other erythrocyte disorders" : {
+                            "Nutritional or metabolic anaemias" : ["3A00 Iron deficiency anaemia","3A01 Megaloblastic anaemia due to vitamin B12 deficiency","3A02 Folate deficiency anaemia","3A03 Other nutritional or metabolic anaemias"],
+                            "3A51 Sickle cell disorders or other haemoglobinopathies" : ["3A51.0 Sickle cell trait"," 3A51.5 Haemoglobin C disease"," 3A51.6 Haemoglobin D disease"],
+                            "3A71 Anaemia due to chronic disease" : [" 3A71.0 Anaemia in neoplastic disease","3A71.1 Anaemia in chronic infectious diseases","3A71.2 Anaemia in chronic kidney disease"]
+                        },
+                        "Coagulation defects, purpura or other haemorrhagic or related conditions" : {
+                            "Fibrinolytic defects" : ["3B50 Inherited fibrinolytic defects","3B51 Acquired fibrinolytic defects"],
+                            "3B62 Qualitative platelet defects" : ["3B62.0 Inherited qualitative platelet defects","3B62.1 Bleeding diathesis due to thromboxane synthesis deficiency"," 3B62.2 Isolated thrombocytopenia"],
+                            "3B63 Thrombocytosis" : [" 3B63.0 Congenital thrombocytosis","3B63.1 Acquired thrombocytosis"]
+                        },
+                        "Diseases of spleen" : {
+                            "3B80 Congenital disorders of spleen" : ["3B80.0 Splenomegaly in storage diseases","LB22 Structural developmental anomalies of spleen"],
+                            "3B81 Acquired disorders of spleen" : [" 3B81.0 Tumour-like conditions of spleen","3B81.1 Postsurgical asplenia","3B81.2 Atrophy of spleen"]
+                        }
+                    },
+
+                    "Diseases of the respiratory system" : {
+                        "Upper respiratory tract disorders" : {
+                            "CA00 Acute nasopharyngitis" : ["Other"],
+                            "CA01 Acute sinusitis" : ["Other"],
+                            "CA02 Acute pharyngitis" : ["CA02.0 Acute pharyngitis due to other bacteria","CA02.1 Acute viral pharyngitis"]
+                        },
+                        "Certain lower respiratory tract diseases" : {
+                            "CA21 Emphysema" : ["CA21.0 MacLeod syndrome","CA21.1 Panlobular emphysema","CA21.2 Centrilobular emphysema"],
+                            "CA22 Chronic obstructive pulmonary disease" : ["CA22.0 Chronic obstructive pulmonary disease with acute exacerbation, unspecified"," CA22.1 Certain specified chronic obstructive pulmonary disease"],
+                            "CA23 Asthma" : ["Allergic asthma","CA23.1 Non-allergic asthma","CA23.2 Other specified forms of asthma or bronchospasm","CA23.3 Unspecified asthma"]
+                        },
+                        "Lung infections" : {
+                            "CA40 Pneumonia" : ["CA40.0 Bacterial pneumonia","CA40.1 Viral pneumonia","CA40.2 Fungal pneumonia"],
+                            "CA41 Acute bronchiolitis" : [" CA41.0 Acute bronchiolitis due to respiratory syncytial virus"," CA41.Y Other specified acute bronchiolitis"]
+                        },
+                        "Pleural, diaphragm or mediastinal disorders" : {
+                            " CB20 Pleural plaque" : ["Other"],
+                            " CB21 Pneumothorax" : ["CB21.0 Spontaneous tension pneumothorax"," CB21.1 Other spontaneous pneumothorax"],
+                            " CB23 Disorders of diaphragm" : ["Other"]
+                        },
+                        "CB40 Certain diseases of the respiratory system" : {
+                            "CB40.0 Ciliary dyskinesia" : ["Other"],
+                            "CB40.1 Young syndrome" : ["Other"]   
+                        },
+                        "CB41 Respiratory failure" : {
+                            "CB41.0 Acute respiratory failure" : ["CB41.00 Acute respiratory failure, Type I","CB41.01 Acute respiratory failure, Type II"," CB41.0Z Acute respiratory failure, unspecified"],
+                            "CB41.1 Chronic respiratory failure" : [" CB41.10 Chronic respiratory failure, Type I","CB41.11 Chronic respiratory failure, Type II"," CB41.1Z Chronic respiratory failure, unspecified"],
+                            "CB41.2 Respiratory failure, unspecified as acute or chronic" : [" CB41.20 Respiratory failure, unspecified, Type I","CB41.21 Respiratory failure, unspecified, Type II"," CB41.2Z Respiratory failure, unspecified"]
+                        },
+                        "Postprocedural disorders of the respiratory system" : {
+                            " CB60 Tracheostomy malfunction" : ["Other"],
+                            " CB61 Chronic pulmonary insufficiency following surgery" : ["Other"]
+                        },
+                        "Developmental respiratory diseases" : {
+                            " LA77 Congenital cyst of mediastinum" : ["Other"],
+                            " LA70 Structural developmental anomalies of the nose or cavum" : [" LA70.0 Arrhinia"," LA70.1 Bifid nose"," LA70.2 Choanal atresia"," LA70.3 Congenital perforated nasal septum","LA70.Y Other specified structural developmental anomalies of the nose or cavum"," LA70.Z Structural developmental anomalies of the nose or cavum, unspecified"],
+                            " LA71 Structural developmental anomalies of larynx" : [" LA71.0 Congenital laryngomalacia"," LA71.1 Laryngocele","LA71.2 Laryngeal hypoplasia"," LA71.3 Congenital subglottic stenosis","KB2J Airway obstruction in the neonate due to airway abnormality"],
+                        },
+                        "Neoplasms of the respiratory system" : {
+                            "Malignant neoplasms of the respiratory system" : ["2C22 Malignant neoplasms of accessory sinuses","2C23 Malignant neoplasms of larynx","2C24 Malignant neoplasms of trachea","2C25 Malignant neoplasms of bronchus or lung","2B6A Malignant neoplasms of oropharynx","2B6B Malignant neoplasms of nasopharynx","2B6C Malignant neoplasms of piriform sinus","2B6D Malignant neoplasms of hypopharynx"],
+                            "Secondary neoplasms of the respiratory system" : ["2D70 Malignant neoplasm metastasis in lung"],
+                            "Carcinoma in situ of the respiratory system" : ["2E62.0 Carcinoma in situ of larynx"," 2E62.1 Carcinoma in situ of trachea"," 2E62.2 Carcinoma in situ of bronchus or lung"],
+                        },
+                        "Symptoms, signs or clinical findings of the respiratory system" : {
+                            "Symptoms or signs involving the respiratory system" : [" MD10 Abnormal sputum","MD11 Abnormalities of breathing"," MD12 Cough","MD30 Pain in throat or chest","MD31 Pleurisy"," MD32 Rales","MD33 Respiratory arrest","MD34 Symptom or complaint of the nose"," MD35 Symptom or complaint of the sinus","MD36 Symptom or complaint of the throat"," MG24.A Fear of respiratory disease"],
+                            "Clinical findings in the respiratory system" : ["MD40 Clinical findings in specimens from respiratory organs and thorax"," MD41 Clinical findings on diagnostic imaging of lung"," MD42 Results of function studies of the respiratory system"]
+                        },
+                        "Pulmonary heart disease or diseases of pulmonary circulation" : {
+                            "7A40 Central sleep apnoeas" : [" 7A40.0 Primary central sleep apnoea","7A40.1 Primary central sleep apnoea of infancy"," 7A40.2 Primary central sleep apnoea of prematurity"," 7A40.3 Central sleep apnea with Cheyne-Stokes breathing","7A40.4 Central sleep apnoea due to a medical condition without Cheyne-Stokes breathing"," 7A40.5 Central sleep apnoea due to high-altitude periodic breathing"," 7A40.6 Central sleep apnoea due to a medication or substance"," 7A40.7 Treatment-emergent central sleep apnoea"],
+                            "7A41 Obstructive sleep apnoea" : ["None"],
+                            "7A42 Sleep-related hypoventilation or hypoxemia disorders" : [" 7A42.0 Obesity hypoventilation syndrome"," 7A42.1 Congenital central alveolar sleep-related hypoventilation","7A42.2 Non-congenital central hypoventilation with hypothalamic abnormalities"," 7A42.3 Idiopathic central alveolar hypoventilation","7A42.4 Sleep-related hypoventilation due to a medication or substance"," 7A42.5 Sleep-related hypoventilation due to medical condition"," 7A42.6 Sleep-related hypoxemia due to a medical condition"],
+                        },
+                        "Sleep-related breathing disorders" : {
+                            "020201" : ["02020101","02020102","02020103"],
+                            "020202" : ["02020201","02020202","02020203"]
+                        }
+                    }
+
+                }
+
+
             
+
             contractInstance.get_hash(patientAddress, {gas: 1000000}, function(error, result){
                 if(!error){
 
@@ -232,6 +320,29 @@
                                         <pre style="margin: 20px 0;" id="records${patientAddress}">${patientRecord}</pre>
                                     </div>
                                 </div>
+
+                                <div class="panel panel-default previous-records">
+                                    <div class="panel-heading">
+                                        <h3 class="text-center">Previous Medical Records</h3>
+                                    </div>
+                                    <div class="panel-body" id="documentLinks">
+                                        <pre style="margin: 10px 0;"></pre>
+                                    </div>
+                                </div>
+
+
+                                <div class="panel panel-default file-upload">
+                                    <div class="panel-heading">
+                                        <h3 class="text-center">Upload Document for Patient</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <input type="text" id="docfilename" class="form-control" placeholder="Enter name of the file" value="Document">
+                                    </div>
+                                    <div class="panel-body">
+                                        <input type="file" id="docFileUpload" class="form-control">
+                                        <button class="btn btn-primary" style="margin-top: 10px;" onclick="uploadDocument(this,`+index+`)">Upload</button>
+                                    </div>
+                                </div> 
                                 <div class="row">
                                     <div class="col-sm-12">
                                         <div class="row">
@@ -239,17 +350,37 @@
                                                 <div class="row">
                                                     <div class="col-sm-2"><label for="ailmentsList" class="control-label">Diagnosis:</label></div>
                                                     <div class="col-sm-10">
-                                                        <select class="form-control" id="ailmentsList${patientAddress}" style="width:inherit;" required>
-                                                            <option selected disabled>-- Please Select --</option>
-                                                            <option value = "0">Common Flu</option>
-                                                            <option value = "1">Viral Infection</option>
-                                                            <option value = "2">Cancer</option>
-                                                            <option value = "3">Tumor</option>
-                                                            <option value = "4">Covid-19</option>
-                                                            <option value = "5">Heart-Disorder</option>
-                                                            <option value = "6">Other</option>
+                                                        <select class="form-control" name="ailmentsList" id="ailmentsList" style="width:inherit;" required >
+                                                                <option value="" selected="selected">ICD-11 for Mortality and Morbidity Statistics</option>
                                                         </select>
                                                     </div>
+                                                    <br><br>
+
+                                                    <div class="col-sm-2"><label for="sub-ailmentsList" class="control-label">Etiology:</label></div>
+                                                    <div class="col-sm-10">
+                                                        <select class="form-control" name="sub-ailmentsList" id="sub-ailmentsList" style="width:inherit;" required >
+                                                                <option value="" selected="selected">Etiology</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <br><br>
+
+                                                    <div class="col-sm-2"><label for="subsub-ailmentsList" class="control-label">Disease</label></div>
+                                                    <div class="col-sm-10">
+                                                        <select class="form-control" name="subsub-ailmentsList" id="subsub-ailmentsList" style="width:inherit;" required>
+                                                                <option value="" selected="selected">Name of disease</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <br><br>
+
+                                                    <div class="col-sm-2"><label for="subsubsub-ailmentsList" class="control-label">Symptoms</label></div>
+                                                    <div class="col-sm-10">
+                                                        <select class="form-control" name="subsubsub-ailmentsList" id="subsubsub-ailmentsList" style="width:inherit;" required>
+                                                                <option value="" selected="selected">Symptoms</option>
+                                                        </select>
+                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -270,7 +401,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>     
+                                </div>  
+                                 
                             </div>
                         </div>`
             
@@ -280,14 +412,182 @@
 
                         cell1.innerHTML=content;
 
-                    })
+                        var docname=[];
 
-                    
+                        contractInstance.getPatientDocumentsname(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                docname=result;
+                                console.log(docname);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+                        function convertUTCToIST(utcDate) {
+                            // Convert UTC date to IST date string
+                            var istDateTimeString = utcDate.toLocaleString("en-IN", {timeZone: "Asia/Kolkata"});
+                            
+                            return istDateTimeString;
+                        }
+
+                        // Convert Unix timestamp to UTC date and then to IST date
+                        function convertUnixToIST(unixTimestamp) {
+                            var utcDate = new Date(unixTimestamp * 1000);
+                            var istDateTimeString = convertUTCToIST(utcDate);
+                            return istDateTimeString;
+                        }
+
+                        
+
+                        var doctime=[];
+
+                        contractInstance.getPatientDocumentstime(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                doctime=result;
+                                console.log(doctime);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+
+                        var documentList1 = [];
+                        var documentList2=[];
+                        var documentList3=[];
+                        var documentList4=[];  
+
+                        contractInstance.getPatientDocuments1(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList1=result;
+                                console.log(documentList1);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+                        contractInstance.getPatientDocuments2(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList2=result;
+                                console.log(documentList2);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+                        contractInstance.getPatientDocuments3(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList3=result;
+                                console.log(documentList3);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+                        contractInstance.getPatientDocuments4(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList4=result;
+
+                                console.log(result);
+                                var documentLinksDiv = document.getElementById("documentLinks");
+                                // let docs=[];
+                                documentLinksDiv.innerHTML='';
+
+                                for (let index=1;index<documentList4.length;index++){
+                                const ipfsPath = "http://localhost:8080/ipfs/"+documentList1[index]+documentList2[index]+documentList3[index]+documentList4[index];
+
+                                // Create a button element
+                                const btn = document.createElement('button');
+                                btn.innerText = 'View'; // Set button text
+                                btn.onclick = function () {
+                                    window.open(ipfsPath, '_blank'); // Open link in a new tab when button is clicked
+                                };
+
+                                const button = document.createElement('button');
+                                button.innerText = 'Download';
+                                button.addEventListener('click',function(){
+                                    var dwdlink=document.createElement('a');
+                                    dwdlink.href=ipfsPath;
+                                    dwdlink.download=docname[index];
+                                    dwdlink.click();
+                                    
+                                })
+                                const space = document.createTextNode(' ');
+
+                                // Create an 'a' element for the document link
+                                const link = document.createElement('a');
+                                link.href = ipfsPath;
+                                link.target = '_blank';
+                                var unixTimestamp = doctime[index];
+                                var istDateTimeString = convertUnixToIST(unixTimestamp);
+                                console.log(istDateTimeString);
+                                link.innerText = istDateTimeString+" - "+docname[index];
+                                documentLinksDiv.appendChild(link);
+                                documentLinksDiv.appendChild(space);
+                                documentLinksDiv.appendChild(space);
+                                documentLinksDiv.appendChild(btn);
+                                documentLinksDiv.appendChild(document.createElement('br'));
+                                documentLinksDiv.appendChild(document.createElement('br'));
+
+                                console.log(typeof(link));
+
+                                }
+                            }
+                            else{
+                                console.log(error);
+                            }
+                        });
+
+                        var ailementList1=document.getElementById("ailmentsList");
+                        var ailementList2=document.getElementById("sub-ailmentsList");
+                        var ailementList3=document.getElementById("subsub-ailmentsList");
+                        var ailementList4=document.getElementById("subsubsub-ailmentsList");
+
+                        for (var x in ailmentsDict) {
+                            ailementList1.options[ailementList1.options.length] = new Option(x, x);
+                        }
+
+                        ailementList1.onchange = function() {
+                            ailementList2.length = 1;
+                            ailementList3.length = 1;
+                            ailementList4.length = 1;
+                            for (var y in ailmentsDict[this.value]) {
+                                ailementList2.options[ailementList2.options.length] = new Option(y, y);
+                            }
+                        }
+
+                        ailementList2.onchange = function() {
+                            ailementList3.length = 1;
+                            ailementList4.length = 1;
+                            for (var z in ailmentsDict[ailementList1.value][this.value]) {
+                                ailementList3.options[ailementList3.options.length] = new Option(z, z);
+                            }
+                        }
+
+                        ailementList3.onchange = function() {
+                            ailementList4.length = 1;
+                            var z = ailmentsDict[ailementList1.value][ailementList2.value][this.value];
+                            for (var i = 0; i < z.length; i++) {
+                                ailementList4.options[ailementList4.options.length] = new Option(z[i], z[i]);
+                            }
+                        }
+
+
+                    })
+  
                 }else{
                     console.log(error);
                 }
-            })            
-
+            });
+            
             toggleRecordsButton +=1
             element.value = "Hide Records";
             element.className = "btn btn-danger"
@@ -322,9 +622,14 @@
         var patientAddress = table.rows[index].cells[1].innerHTML;
       
         console.log(patientAddress);
-        var diagnosis = $("#ailmentsList"+patientAddress).val();
-        diagnosis = parseInt(diagnosis);
-        var diagnosed = ailmentsDict[diagnosis];
+        var diagnostic_label=document.getElementById("ailmentsList").value;
+        console.log(diagnostic_label);
+        var etiology=document.getElementById("sub-ailmentsList").value;
+        console.log(etiology);
+        var disease_name=document.getElementById("subsub-ailmentsList").value;
+        console.log(disease_name);
+        var symptoms=document.getElementById("subsubsub-ailmentsList").value;
+        console.log(symptoms);
         var comments = document.getElementById("details").value;
 
         var oldRecords = $("#records"+patientAddress).html();
@@ -332,24 +637,28 @@
         var newRecords = 
 `Diagnosed By : ${docName}
 Diagnosis Time : ${getDateTime()}
-Diagnosis : ${diagnosed}
-Comments : ${comments}
-
-        
+Diagnostic Label : ${diagnostic_label}
+Etiology : ${etiology}
+Disease Name : ${disease_name}
+Symptoms : ${symptoms}
+Comments : ${comments}      
 `
 
         var updatedRecords = oldRecords+newRecords;
-        
-        if (!isNaN(diagnosis)){
+        console.log(updatedRecords);
+        if (diagnostic_label!=""){
 
-            var buffer = Buffer(updatedRecords);
+            var buffer = Buffer.from(updatedRecords);
 
             ipfs.files.add(buffer, (error, result) => {
+                console.log("after IPFS");
                 if(error){
-                    console.log(error)
+                    console.log(error);
                 }else{
                     ipfshash = result[0].hash;
-                    contractInstance.insurance_claim(patientAddress, diagnosis, ipfshash, {gas: 1000000}, function(error, result){
+                    console.log("after BC");
+                    contractInstance.insurance_claim(patientAddress, diagnostic_label, ipfshash, {gas: 1000000}, function(error, result){
+                        console.log("after BC");
                         if(!error){
                             alert("Your diagnosis has been submitted.");
                             // delete content row
@@ -364,14 +673,153 @@ Comments : ${comments}
                     })
                 }
             });
-            
         }
         else{
-            alert("Select a diagnosis");
+            alert("Error");
         }
+            
     }
+
+    async function handleFileUpload(file, patientAddress, filename) {
+            const reader = new window.FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onloadend = async () => {
+                const buffer = Buffer(reader.result);
+                const ipfsResult = await ipfs.add(buffer);
+                console.log(ipfsResult);
+                console.log(typeof(ipfsResult[0].path));
+                const ipfsHash = ipfsResult[0].path;
+                console.log(ipfsHash);
+                const parts = ipfsHash.match(/.{1,12}/g);
+                console.log(parts);
+
+                console.log(filename);
+
+                // Call the smart contract function to store the document's IPFS hash
+                // Assuming you have a function in your contract for this and it's set up in app.js
+                contractInstance.addPatientDocument(patientAddress, parts[0],parts[1],parts[2],parts[3], filename, {gas: 1000000}, function(err, res) {
+                    if(!err){
+                        alert('Document uploaded successfully');
+                        console.log(ipfsHash);
+                        console.log(res);
+                    
+                }
+                else{
+                    console.log(err);
+                }
+                });
+            };
+        }
+
+        function uploadDocument(element,index) {
+            var table = document.getElementById("viewPatient");
+            const fileInput = document.getElementById('docFileUpload');
+            var filename=document.getElementById("docfilename").value;
+            console.log(filename);
+            console.log(fileInput);
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                // Logic to determine the patientAddress should go here
+                var patientAddress = table.rows[index].cells[1].innerHTML;
+                handleFileUpload(file, patientAddress, filename);
+            } else {
+                alert('Please select a file to upload.');
+            }
+        }
 </script>
 
 </body>
 
 </html>
+
+// <!-- <div class="col-sm-2"><label for="ailmentsList" class="control-label">Diagnosis:</label></div>
+//                                                     // <div class="col-sm-10">
+//                                                     //     <select class="form-control" id="ailmentsList${patientAddress}" style="width:inherit;" required>
+//                                                     //         <option selected disabled>-- Please Select --</option>
+//                                                     //         <option value = "0">Common Flu</option>
+//                                                     //         <option value = "1">Viral Infection</option>
+//                                                     //         <option value = "2">Cancer</option>
+//                                                     //         <option value = "3">Tumor</option>
+//                                                     //         <option value = "4">Covid-19</option>
+//                                                     //         <option value = "5">Heart-Disorder</option>
+//                                                     //         <option value = "6">Other</option>
+//                                                     //     </select>
+//                                                     // </div> -->
+
+
+//                                                     <!-- <form name="form1" id="form1" action="/action_page.php">
+//                                                         Subjects: <select name="subject" id="subject">
+//                                                             <option value="" selected="selected">Select subject</option>
+//                                                             </select>
+//                                                             <br><br>
+//                                                         Topics: <select name="topic" id="topic">
+//                                                             <option value="" selected="selected">Please select subject first</option>
+//                                                             </select>
+//                                                             <br><br>
+//                                                         Chapters: <select name="chapter" id="chapter">
+//                                                             <option value="" selected="selected">Please select topic first</option>
+//                                                             </select>
+//                                                             <br><br>  
+//                                                     </form> -->
+
+
+
+                                                    
+//                         <!-- function populateCategoryDropdown() {
+//                             var categoryDropdown = document.getElementById("ailmentsList");
+
+//                             // Clear existing options
+//                             categoryDropdown.innerHTML = '<option value="">Select Category</option>';
+
+//                             // Populate options based on ailmentsDict
+//                             Object.keys(ailmentsDict).forEach(function(categoryKey) {
+//                                 var option = document.createElement("option");
+//                                 option.value = categoryKey;
+//                                 option.text = "Category " + categoryKey;
+//                                 categoryDropdown.appendChild(option);
+//                             });
+//                         }
+
+
+//                         function populateSubcategoryDropdown() {
+//                             var categoryDropdown = document.getElementById("ailmentsList");
+//                             var subcategoryDropdown = document.getElementById("sub-ailmentsList");
+//                             var selectedCategory = categoryDropdown.value;
+
+//                             // Clear existing options
+//                             subcategoryDropdown.innerHTML = '<option value="">Select Subcategory</option>';
+
+//                             // Populate options based on selected category
+//                             Object.keys(ailmentsDict[selectedCategory]).forEach(function(subcategoryKey) {
+//                                 var option = document.createElement("option");
+//                                 option.value = subcategoryKey;
+//                                 option.text = "Subcategory " + subcategoryKey;
+//                                 subcategoryDropdown.appendChild(option);
+//                             });
+//                         }
+
+//                         function populateAilmentDropdown() {
+//                             var subcategoryDropdown = document.getElementById("sub-ailmentsList");
+//                             var ailmentDropdown = document.getElementById("subsub-ailmentsList");
+//                             var selectedCategory=document.getElementById("ailementList");
+//                             var selectedSubcategory = subcategoryDropdown.value;
+
+//                             // Clear existing options
+//                             ailmentDropdown.innerHTML = '<option value="">Select Ailment</option>';
+
+//                             // Populate options based on selected subcategory
+//                             ailmentsDict[selectedCategory][selectedSubcategory].forEach(function(ailment) {
+//                                 var option = document.createElement("option");
+//                                 option.value = ailment;
+//                                 option.text = "Ailment " + ailment;
+//                                 ailmentDropdown.appendChild(option);
+//                             });
+//                         }
+
+//                 //             // Populate the category dropdown initially
+//                 //         populateCategoryDropdown(); -->
+
+
+
+//                 //                                     <!-- contractInstance.addPatientDocument(patientAddress, ipfsHash, {from: web3.eth.defaultAccount}) -->
+//                 // <!-- .then(result => { -->

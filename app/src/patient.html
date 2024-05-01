@@ -17,10 +17,7 @@
 
     <!-- Custom CSS -->
     <style>
-    body {
-        /* padding-top: 70px; */
-        /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
-    }
+
     .navbar{
         margin-bottom: 70px;
     }
@@ -49,7 +46,7 @@
         border-radius: .25em;
         width: 1.3em;
         height: 1.3em;
-        float: left;
+        /* float: left; */
         margin-right: .5em;
     }
 
@@ -107,7 +104,7 @@
         <div class="container">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="text-center">Personal Information</h3>
+                    <h3 class="text-center">Personal Information of Patient</h3>
                 </div>
                 <div class="panel-body">
                     <div class="row">
@@ -117,9 +114,25 @@
                                     <th>Name:</th>
                                     <td id="name"></td>
                                 </tr>
+                                <!-- <tr>
+                                    <th>Occupation:</th>
+                                    <td id="occupation"></td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth:</th>
+                                    <td id="dob"></td>
+                                </tr> -->
                                 <tr>
                                     <th>Age:</th>
                                     <td id="age"></td>
+                                </tr>
+                                <tr>
+                                    <th>Father/Spouse Name:</th>
+                                    <td id="guardian"></td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Number:</th>
+                                    <td id="phonenumber"></td>
                                 </tr>
                             </table>
                             
@@ -135,6 +148,15 @@
                         </div>
                     </div>
                        
+                </div>
+            </div>
+
+            <div class="panel panel-default previous-records">
+                <div class="panel-heading">
+                    <h3 class="text-center">Previous Documents</h3>
+                </div>
+                <div class="panel-body col-sm-offset-1" id="documentLinks">
+                    <pre style="margin: 10px 0;"></pre>
                 </div>
             </div>
             
@@ -217,7 +239,11 @@
         key = key.toLocaleLowerCase();
 
         var a = "";
+        // var occupation="";
+        // var dob="";
         var b = 0;
+        var guardian="";
+        var phonenumber="";
         var ailments = [];
         var insurerName = "";
 
@@ -231,55 +257,203 @@
             if(!error){
                 console.log(result);
                 a = result[0]; 
+                // occupation=result[2];
+                // dob=result[3];
                 b = result[1];
-                ailments = result[2];
-                insurerAddress = result[3];
-                recordHash = result[4];
+                guardian=result[2];
+                phonenumber=result[3];
+                ailments = result[4];
+                insurerAddress = result[5];
+                recordHash = result[6];
                 $("#name").html(a);
                 $("#age").html(b.c[0]);
+                $("#guardian").html(guardian);
+                $("#phonenumber").html(phonenumber);
                 $("#recordsHash").html(recordHash);
 
-                if (insurerAddress != 0){
-                    $("#buyInsurance").hide();
+                
+
+                // if (insurerAddress != 0){
+                //     $("#buyInsurance").hide();
 
 
-                } else {
-                    var InsurerList = 0;
+                // } else {
+                //     var InsurerList = 0;
                     
-                    contractInstance.get_insurer_list({gas: 1000000}, function(error, result){
+                //     contractInstance.get_insurer_list({gas: 1000000}, function(error, result){
 
-                        if(!error){
+                //         if(!error){
                             
-                            InsurerList = result;
-                            var list = document.getElementById("insurers");
-                            for (var i = 0; i < InsurerList.length; i++) {
+                //             InsurerList = result;
+                //             var list = document.getElementById("insurers");
+                //             for (var i = 0; i < InsurerList.length; i++) {
                                 
-                                contractInstance.get_insurer.call(InsurerList[i], {gas: 1000000}, function(error, result){
+                //                 contractInstance.get_insurer.call(InsurerList[i], {gas: 1000000}, function(error, result){
                                     
                                     
-                                    if(!error){
-                                        d = result[0];
+                //                     if(!error){
+                //                         d = result[0];
 
-                                        var option = document.createElement("option");
-                                        option.text = d;
+                //                         var option = document.createElement("option");
+                //                         option.text = d;
 
-                                        list.add(option);
-                                    } else{
-                                        console.log(error);
-                                    }
-                                })
-                            }
-                        }
-                    })
-                    $("#buyInsurance").show();
+                //                         list.add(option);
+                //                     } else{
+                //                         console.log(error);
+                //                     }
+                //                 })
+                //             }
+                //         }
+                //     })
+                //     $("#buyInsurance").show();
 
-                    $("#insuranceInfo").hide();
-                }
+                //     $("#insuranceInfo").hide();
+                // }
             }
             else
                 console.error(error);
         });
         
+        //Previously uploaded documents
+        var docname=[];
+        var patientAddress=key;
+
+                        contractInstance.getPatientDocumentsname(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                docname=result;
+                                console.log(docname);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+                        function convertUTCToIST(utcDate) {
+                            // Convert UTC date to IST date string
+                            var istDateTimeString = utcDate.toLocaleString("en-IN", {timeZone: "Asia/Kolkata"});
+                            
+                            return istDateTimeString;
+                        }
+
+                        // Convert Unix timestamp to UTC date and then to IST date
+                        function convertUnixToIST(unixTimestamp) {
+                            var utcDate = new Date(unixTimestamp * 1000);
+                            var istDateTimeString = convertUTCToIST(utcDate);
+                            return istDateTimeString;
+                        }
+
+                        
+
+                        var doctime=[];
+
+                        contractInstance.getPatientDocumentstime(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                doctime=result;
+                                console.log(doctime);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+
+                        var documentList1 = [];
+                        var documentList2=[];
+                        var documentList3=[];
+                        var documentList4=[];  
+
+                        contractInstance.getPatientDocuments1(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList1=result;
+                                console.log(documentList1);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+                        contractInstance.getPatientDocuments2(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList2=result;
+                                console.log(documentList2);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+
+                        contractInstance.getPatientDocuments3(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList3=result;
+                                console.log(documentList3);
+                            }
+                            else{
+                                console.log(error);
+                            }
+
+                        });
+                        contractInstance.getPatientDocuments4(patientAddress, {gas: 1000000}, function(error, result){
+                            if(!error){
+                                documentList4=result;
+
+                                console.log(result);
+                                var documentLinksDiv = document.getElementById("documentLinks");
+                                // let docs=[];
+                                documentLinksDiv.innerHTML='';
+
+                                for (let index=1;index<documentList4.length;index++){
+                                const ipfsPath = "http://localhost:8080/ipfs/"+documentList1[index]+documentList2[index]+documentList3[index]+documentList4[index];
+
+                                // Create a button element
+                                const btn = document.createElement('button');
+                                btn.innerText = 'View'; // Set button text
+                                btn.onclick = function () {
+                                    window.open(ipfsPath, '_blank'); // Open link in a new tab when button is clicked
+                                };
+
+                                const button = document.createElement('button');
+                                button.innerText = 'Download';
+                                button.addEventListener('click',function(){
+                                    var dwdlink=document.createElement('a');
+                                    dwdlink.href=ipfsPath;
+                                    dwdlink.download=docname[index];
+                                    dwdlink.click();
+                                    
+                                })
+                                const space = document.createTextNode(' ');
+
+                                // Create an 'a' element for the document link
+                                const link = document.createElement('a');
+                                link.href = ipfsPath;
+                                link.target = '_blank';
+                                var unixTimestamp = doctime[index];
+                                var istDateTimeString = convertUnixToIST(unixTimestamp);
+                                console.log(istDateTimeString);
+                                link.innerText = istDateTimeString+" - "+docname[index];
+                                documentLinksDiv.appendChild(link);
+                                documentLinksDiv.appendChild(space);
+                                documentLinksDiv.appendChild(space);
+                                documentLinksDiv.appendChild(btn);
+                                documentLinksDiv.appendChild(document.createElement('br'));
+                                documentLinksDiv.appendChild(document.createElement('br'));
+
+                                console.log(typeof(link));
+
+                                }
+                            }
+                            else{
+                                console.log(error);
+                            }
+                        });
+
+
+
+
+
         // print out the doctors to share emr
         var DoctorList = 0;
         console.log("Getting Doctor List");
